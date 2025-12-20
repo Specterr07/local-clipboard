@@ -1,17 +1,40 @@
+
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%=title%></title>
+    <title>
+        <%=title%>
+    </title>
 </head>
+
 <body style="margin: 0; padding: 0;">
     <div style="background-color: #222222; color: #ffffff; width: 100vw; height: 100vh;" class="main">
-        <div class="form">Form Here</div>
+
+        <form action="/update-text" method="post" class="form">
+        <!-- the "/update-text" is the url the form will submit data to and POST is the method -->
+            <div class="content-text-area">
+                <label for="text-content">Paste Text Here:</label>
+                <textarea id="text-content" name="content" placeholder="Paste Here"></textarea>
+            </div>
+            
+            <div class="submit">
+                <button type="submit">Upload</button>
+            </div>
+
+        </form>
+
         <br>
+
         <div class="display">Display Data ->
-            <p><%=text%></p>
+            <p>
+                <%=text%>
+            </p>
         </div>
+
     </div>
 </body>
+
 </html>
