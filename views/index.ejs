@@ -14,9 +14,13 @@
     <div style="background-color: #222222; color: #ffffff; width: 100vw; height: 100vh;" class="main">
 
         <form action="/update-text" method="post" class="form">
+        <!-- This form will return an object with key:value pair, {content: ""} -->
         <!-- the "/update-text" is the url the form will submit data to and POST is the method -->
             <div class="content-text-area">
+                <input type="text" name="secret-text" placeholder="this wil be a secret"></input>
+                <br>
                 <label for="text-content">Paste Text Here:</label>
+                <!-- Whatever value is pasted in the text variable will be assigned as value to the key name="content" as {content: ""} -->
                 <textarea id="text-content" name="content" placeholder="Paste Here"></textarea>
             </div>
             
