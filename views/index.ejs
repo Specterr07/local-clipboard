@@ -13,26 +13,37 @@
 <body style="margin: 0; padding: 0;">
     <div style="background-color: #222222; color: #ffffff; width: 100vw; height: 100vh;" class="main">
 
-        <form action="/update-text" method="post" class="form">
-        <!-- This form will return an object with key:value pair, {content: ""} -->
+        <form action="/update-text" method="post" class="text-form">
+        <!-- This form will return an object with key:value pair, {content: ""} Notes on form ./notes/form.md -->
         <!-- the "/update-text" is the url the form will submit data to and POST is the method -->
-            <div class="content-text-area">
+        
+            <div class="paste-text-area">
                 <input type="text" name="secret-text" placeholder="this wil be a secret"></input>
                 <br>
                 <label for="text-content">Paste Text Here:</label>
                 <!-- Whatever value is pasted in the text variable will be assigned as value to the key name="content" as {content: ""} -->
-                <textarea id="text-content" name="content" placeholder="Paste Here"></textarea>
+                <textarea name="content" placeholder="Paste Here" id="text-content"></textarea>
             </div>
             
             <div class="submit">
-                <button type="submit">Upload</button>
+                <button type="submit">LUND LELELELELELELLE</button>
             </div>
 
         </form>
 
         <br>
 
+        <form action="/upload-file" method="post" enctype="multipart/form-data" class="file-form">
+            <input type="file" name="uploaded-file">
+            <button type="submit">Upload</button>
+        </form>
+
+        <br>
+
         <div class="display">Display Data ->
+            <div class="display-file-loop">
+                <!-- a for loop to loop the file array and create <a href=""></a> download links -->
+            </div>
             <p>
                 <%=text%>
             </p>
