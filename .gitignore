@@ -149,3 +149,10 @@ vite.config.ts.timestamp-*
 
 DS_Store
 **/.DS_Store
+
+# Build artifacts
+dist/
+build/
+*.exe
+local-clipboard
+local-clipboard.exe

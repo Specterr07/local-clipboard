@@ -1,64 +1,182 @@
-
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>
-        <%=title%>
-    </title>
+    <title><%= title %></title>
+    <style>
+        /* [Basic UI Styling] */
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #1a1a1a; color: #f0f0f0; display: flex; justify-content: center; padding: 20px; }
+        .main { width: 100%; max-width: 500px; background: #2a2a2a; padding: 20px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+        h2, h3 { color: #fff; border-bottom: 1px solid #444; padding-bottom: 10px; }
+        textarea, input[type="text"] { width: 100%; padding: 12px; background: #333; border: 1px solid #444; color: white; border-radius: 6px; box-sizing: border-box; margin-bottom: 10px; }
+        button { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px; margin-top: 5px; transition: background 0.2s; }
+        button:hover { background: #0056b3; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        label[for="file-input"] { -webkit-tap-highlight-color: rgba(77, 171, 247, 0.3); }
+        label[for="file-input"]:active { background: #444; }
+        .file-list { list-style: none; padding: 0; }
+        .file-list li { background: #333; margin: 8px 0; padding: 10px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; }
+        .file-list a { color: #4dabf7; text-decoration: none; font-weight: bold; }
+        .qr-container { text-align: center; margin-bottom: 20px; background: white; padding: 10px; border-radius: 8px; display: inline-block; }
+    </style>
 </head>
-
-<body style="margin: 0; padding: 0;">
-    <div style="background-color: #222222; color: #ffffff; width: 100vw; height: 100vh;" class="main">
-
-        <form action="/update-text" method="post" class="text-form">
-        <!-- This form will return an object with key:value pair, {content: ""} Notes on form ./notes/form.md -->
-        <!-- the "/update-text" is the url the form will submit data to and POST is the method -->
+<body>
+    <div class="main">
         
-            <div class="paste-text-area">
-                <input type="text" name="secret-text" placeholder="this wil be a secret"></input>
-                <br>
-                <label for="text-content">Paste Text Here:</label>
-                <!-- Whatever value is pasted in the text variable will be assigned as value to the key name="content" as {content: ""} -->
-                <textarea name="content" placeholder="Paste Here" id="text-content"></textarea>
+        <div style="text-align: center;">
+            <div class="qr-container">
+                <img src="<%= qrCode %>" alt="Scan to Connect" width="150">
             </div>
-            
-            <div class="submit">
-                <button type="submit">Upload Text</button>
-            </div>
-
+            <p style="color: #888; font-size: 0.9em;">Scan to connect on phone</p>
+        </div>
+        
+        <h3>📝 Shared Text</h3>
+        
+        <form action="/update-text" method="post" style="margin-top: 20px;">
+            <textarea name="content" placeholder="Type new text here..."></textarea>
+            <button type="submit">Update Text</button>
         </form>
 
-        <br>
-
-        <form action="/upload-file" method="post" enctype="multipart/form-data" class="file-form">
-            <input type="file" name="uploaded-file">
-            <button type="submit">Upload file</button>
-        </form>
-
-        <br>
-
-        <div class="display">Display Data ->
-
-            <div class="display-file-loop">
-                <!-- a for loop to loop the file array and create <a href=""></a> download links -->
-                <ul>
-                    <% for (let i = 0; i < files.length; i++) { %>
-                    <li><a download target="_blank" rel="noopener noreferrer" href="<%= files[i].url %>"><%= files[i].filename %></a></li>
-                    <% } %>
-                </ul>
-            </div>
-            <div>
-                <p>
-                    <%=text%>
-                </p>
-            </div>
-            
+        <div style="position: relative;">
+            <textarea id="shared-text" rows="4" readonly><%= text %></textarea>
+            <button onclick="copyToClipboard()" style="background: #28a745;">📋 Copy to Clipboard</button>
         </div>
 
-    </div>
-</body>
 
+        <h3>📁 Files</h3>
+        <form id="upload-form" action="/upload-file" method="post" enctype="multipart/form-data">
+            <label for="file-input" style="display: block; width: 100%; padding: 12px; background: #333; border: 2px dashed #555; border-radius: 6px; text-align: center; cursor: pointer; margin-bottom: 10px; color: #4dabf7;">
+                <span id="file-label">📎 Choose File or Tap to Select</span>
+            </label>
+            <input type="file" id="file-input" name="uploaded-file" accept="*/*" style="display: none;" onchange="updateFileLabel(this)">
+            <button type="submit" id="upload-btn" style="opacity: 0.5; pointer-events: none;">Upload File</button>
+            <div id="upload-status" style="margin-top: 10px; color: #888; font-size: 0.9em;"></div>
+        </form>
+
+        <ul class="file-list">
+            <% for (let i = 0; i < files.length; i++) { %>
+                <li>
+                    <span><%= files[i].filename %></span>
+                    <a href="/download/<%= encodeURIComponent(files[i].storedFilename || files[i].filename) %>" download="<%= files[i].filename %>">Download ⬇</a>
+                </li>
+            <% } %>
+    </div>
+
+    <script>
+        async function copyToClipboard() {
+            const copyText = document.getElementById("shared-text");
+            const textToCopy = copyText.value;
+            
+            // Check if clipboard API is available (modern browsers and mobile)
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                try {
+                    await navigator.clipboard.writeText(textToCopy);
+                    showCopyFeedback("✅ Copied to clipboard!");
+                    return;
+                } catch (err) {
+                    console.log("Clipboard API failed, trying fallback:", err);
+                }
+            }
+            
+            // Fallback method for older browsers or when clipboard API fails
+            try {
+                // Create a temporary textarea element
+                const tempTextarea = document.createElement("textarea");
+                tempTextarea.value = textToCopy;
+                tempTextarea.style.position = "fixed";
+                tempTextarea.style.left = "-9999px";
+                tempTextarea.style.top = "-9999px";
+                document.body.appendChild(tempTextarea);
+                
+                // Select and copy
+                tempTextarea.focus();
+                tempTextarea.select();
+                
+                // For iOS devices
+                if (navigator.userAgent.match(/ipad|iphone/i)) {
+                    const range = document.createRange();
+                    range.selectNodeContents(tempTextarea);
+                    const selection = window.getSelection();
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                    tempTextarea.setSelectionRange(0, 999999);
+                }
+                
+                const successful = document.execCommand('copy');
+                document.body.removeChild(tempTextarea);
+                
+                if (successful) {
+                    showCopyFeedback("✅ Copied to clipboard!");
+                } else {
+                    showCopyFeedback("❌ Copy failed. Please select and copy manually.");
+                }
+            } catch (err) {
+                console.error("Copy failed:", err);
+                showCopyFeedback("❌ Copy failed. Please select and copy manually.");
+            }
+        }
+        
+        function showCopyFeedback(message) {
+            // Remove existing feedback if any
+            const existingFeedback = document.getElementById("copy-feedback");
+            if (existingFeedback) {
+                existingFeedback.remove();
+            }
+            
+            // Create feedback element
+            const feedback = document.createElement("div");
+            feedback.id = "copy-feedback";
+            feedback.textContent = message;
+            feedback.style.cssText = "position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #28a745; color: white; padding: 12px 24px; border-radius: 6px; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.3); font-weight: bold;";
+            
+            document.body.appendChild(feedback);
+            
+            // Remove after 2 seconds
+            setTimeout(() => {
+                if (feedback.parentNode) {
+                    feedback.parentNode.removeChild(feedback);
+                }
+            }, 2000);
+        }
+
+        function updateFileLabel(input) {
+            const label = document.getElementById("file-label");
+            const uploadBtn = document.getElementById("upload-btn");
+            const status = document.getElementById("upload-status");
+            
+            if (input.files && input.files.length > 0) {
+                const fileName = input.files[0].name;
+                const fileSize = (input.files[0].size / 1024 / 1024).toFixed(2); // MB
+                label.textContent = `📎 Selected: ${fileName}`;
+                status.textContent = `Size: ${fileSize} MB`;
+                uploadBtn.style.opacity = "1";
+                uploadBtn.style.pointerEvents = "auto";
+            } else {
+                label.textContent = "📎 Choose File or Tap to Select";
+                status.textContent = "";
+                uploadBtn.style.opacity = "0.5";
+                uploadBtn.style.pointerEvents = "none";
+            }
+        }
+
+        // Make file input clickable on mobile (iPhone/Android)
+        document.getElementById("file-input").addEventListener('change', function(e) {
+            updateFileLabel(e.target);
+        });
+
+        // Handle form submission with loading state
+        document.getElementById("upload-form").addEventListener('submit', function(e) {
+            const fileInput = document.getElementById("file-input");
+            if (!fileInput.files || fileInput.files.length === 0) {
+                e.preventDefault();
+                alert("Please select a file first");
+                return false;
+            }
+            const uploadBtn = document.getElementById("upload-btn");
+            uploadBtn.textContent = "Uploading...";
+            uploadBtn.disabled = true;
+        });
+    </script>
+</body>
 </html>
