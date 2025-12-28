@@ -1,8 +1,9 @@
-# Todo
+## Todo
+1. set upload size limit.
 
 ## Features to Add.
 
-1. Drag and File Area.
+1. Drag and Drop File Area.
 2. The mobile web app should directly copy things to clipboard on refreshing the webApp(instead of again copying).
 
 ## Big Upgrade.
