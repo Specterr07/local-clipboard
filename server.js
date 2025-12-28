@@ -36,7 +36,7 @@ app.post('/update-text', (req, res) => {
 app.post('/upload-file', upload.single('uploaded-file'), (req, res) => {
     const fileInfo = {
     filename: `${req.file.originalname}`,
-    path: `${req.file.path}`};
+    url: '/uploads/' + req.file.filename};
 
     sharedFile.push(fileInfo);
     console.log(sharedFile);

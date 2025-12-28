@@ -46,7 +46,7 @@
                 <!-- a for loop to loop the file array and create <a href=""></a> download links -->
                 <ul>
                     <% for (let i = 0; i < files.length; i++) { %>
-                    <li><a href="<%= files[i].path %>"><%= files[i].filename %></a></li>
+                    <li><a download target="_blank" rel="noopener noreferrer" href="<%= files[i].url %>"><%= files[i].filename %></a></li>
                     <% } %>
                 </ul>
             </div>
